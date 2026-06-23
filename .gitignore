@@ -1,0 +1,14 @@
+target/
+.classpath
+.project
+.settings/
+bin/
+
+lucene-index/
+
+*.log
+
+.DS_Store
+
+.idea/
+*.iml
