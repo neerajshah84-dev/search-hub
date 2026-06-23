@@ -117,6 +117,17 @@ Score: 3.42
 ...patient suffering from [[anxiety]] and restlessness...
 ```
 
+## Sample Search
+
+Query:
+anxiety
+
+Result:
+File: materia-medica.txt
+Score: 3.42
+
+...patient suffering from [[anxiety]] and restlessness...
+
 ---
 
 ## Why This Project?
