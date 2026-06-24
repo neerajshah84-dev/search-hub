@@ -23,4 +23,4 @@ jobs:
           cache: maven
 
       - name: build project with Mavenv
-        run: mvn clean compile                               qq
+        run: mvn clean compile
