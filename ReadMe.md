@@ -128,6 +128,12 @@ Score: 3.42
 
 ...patient suffering from [[anxiety]] and restlessness...
 
+
+##For testing spring-boot search api:
+
+Url : /api/search?query=anxiety
+
+
 ---
 
 ## Why This Project?
