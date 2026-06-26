@@ -21,6 +21,8 @@ import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.search.highlight.SimpleSpanFragmenter;
 import org.apache.lucene.store.FSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +31,17 @@ import com.searchhub.dto.SearchResultDTO;
 @Service
 public class SearchService {
 	
+	private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
+	
+	
+	
 	@Value("${index.path}")
 	private String path;
 	
 	
 	public List<SearchResultDTO> search(String searchQuery) throws Exception{
+
+		long start = System.currentTimeMillis();
 		
 		List<SearchResultDTO> searchResults = new  ArrayList<SearchResultDTO>();
 //		Path indexPath = Paths.get( Utilities.INSTANCE.get("INDEX_PATH"));
@@ -55,7 +63,8 @@ public class SearchService {
 			
 			TopDocs results = searcher.search(query , 10);
 			
-			System.out.println("total results are: "+ results.totalHits);
+			logger.info("total results are: '{}' ", results.totalHits);
+			
 			StoredFields storedFields = searcher.storedFields();
 			
 			for (ScoreDoc scoreDoc : results.scoreDocs) {
@@ -64,15 +73,17 @@ public class SearchService {
 				
 				String content = hit.get("content");
 				String filename = hit.get("filename");
-						
-				System.out.println("========");
-				System.out.println("path is:::::: " + hit.get("path"));
-				System.out.println("filename is:::::: " + hit.get("filename"));
+					
+				logger.debug("matched file name is '{}' and score is '{}' ", filename, scoreDoc.score);
+				
+//				System.out.println("========");
+//				System.out.println("path is:::::: " + hit.get("path"));
+//				System.out.println("filename is:::::: " + hit.get("filename"));
 				
 				
 				String text = getHighlightedText(analyzer ,query , "content" , content );
-				System.out.println(text);
-				System.out.println("========");
+//				System.out.println(text);
+//				System.out.println("========");
 				
 //				System.out.println("Score: " + scoreDoc.score);
 				
@@ -81,10 +92,15 @@ public class SearchService {
 				
 			}
 			
+			long end = System.currentTimeMillis();
+			
+			logger.info("Search completed. Query = '{}' , number of results = '{}' and time taken = '{}' ", searchQuery, results.scoreDocs.length, (end-start) );
+
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Problem in searching for search query: '{}' ", searchQuery, e);
 		}
+		
 		return searchResults;
 	}
 
