@@ -28,10 +28,19 @@ import org.springframework.stereotype.Service;
 
 import com.searchhub.dto.SearchResultDTO;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+
 @Service
 public class SearchService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SearchService.class);
+	
+	private final Counter searchRequestCounter;
+	private final Timer searchTimer;
+	private final DistributionSummary searchResultSummary;
 	
 	
 	
@@ -39,69 +48,91 @@ public class SearchService {
 	private String path;
 	
 	
+	public SearchService(MeterRegistry meterRegistry) {
+		this.searchRequestCounter = Counter.builder("searchhub.search.requests")
+										   .description("Total number ofnadacoew Search Requests")
+										   .register(meterRegistry);
+		
+		this.searchTimer = Timer.builder("searchhub.search.duration")
+				                .description("Search execution time")
+				                .register(meterRegistry);
+		
+		this.searchResultSummary = DistributionSummary.builder("searchhub.search.results")
+				                                      .description("Number of results returned per search")
+				                                      .register(meterRegistry);
+		
+	}
+	
 	public List<SearchResultDTO> search(String searchQuery) throws Exception{
 
 		long start = System.currentTimeMillis();
 		
-		List<SearchResultDTO> searchResults = new  ArrayList<SearchResultDTO>();
-//		Path indexPath = Paths.get( Utilities.INSTANCE.get("INDEX_PATH"));
-		Path indexPath = Paths.get(path);
+		searchRequestCounter.increment();
 		
-		try (
-				Analyzer analyzer = new StandardAnalyzer();			
-				DirectoryReader reader = DirectoryReader.open( FSDirectory.open(indexPath));
-				
-			) {
+		return searchTimer.recordCallable(() -> {
+			List<SearchResultDTO> searchResults = new  ArrayList<SearchResultDTO>();
+//			Path indexPath = Paths.get( Utilities.INSTANCE.get("INDEX_PATH"));
+			Path indexPath = Paths.get(path);
 			
-			
-			IndexSearcher searcher = new IndexSearcher(reader);
-			
-			QueryParser parser = new QueryParser("content", analyzer);
-			
-			Query query = parser.parse(searchQuery);
-			
-			
-			TopDocs results = searcher.search(query , 10);
-			
-			logger.info("total results are: '{}' ", results.totalHits);
-			
-			StoredFields storedFields = searcher.storedFields();
-			
-			for (ScoreDoc scoreDoc : results.scoreDocs) {
-				
-				Document hit = storedFields.document(scoreDoc.doc);
-				
-				String content = hit.get("content");
-				String filename = hit.get("filename");
+			try (
+					Analyzer analyzer = new StandardAnalyzer();			
+					DirectoryReader reader = DirectoryReader.open( FSDirectory.open(indexPath));
 					
-				logger.debug("matched file name is '{}' and score is '{}' ", filename, scoreDoc.score);
-				
-//				System.out.println("========");
-//				System.out.println("path is:::::: " + hit.get("path"));
-//				System.out.println("filename is:::::: " + hit.get("filename"));
+				) {
 				
 				
-				String text = getHighlightedText(analyzer ,query , "content" , content );
-//				System.out.println(text);
-//				System.out.println("========");
+				IndexSearcher searcher = new IndexSearcher(reader);
 				
-//				System.out.println("Score: " + scoreDoc.score);
+				QueryParser parser = new QueryParser("content", analyzer);
 				
-				searchResults.add( new SearchResultDTO(filename, text, scoreDoc.score) );
+				Query query = parser.parse(searchQuery);
 				
 				
+				TopDocs results = searcher.search(query , 10);
+				
+				logger.info("total results are: '{}' ", results.totalHits);
+				
+				StoredFields storedFields = searcher.storedFields();
+				
+				for (ScoreDoc scoreDoc : results.scoreDocs) {
+					
+					Document hit = storedFields.document(scoreDoc.doc);
+					
+					String content = hit.get("content");
+					String filename = hit.get("filename");
+						
+					logger.debug("matched file name is '{}' and score is '{}' ", filename, scoreDoc.score);
+					
+//					System.out.println("========");
+//					System.out.println("path is:::::: " + hit.get("path"));
+//					System.out.println("filename is:::::: " + hit.get("filename"));
+					
+					
+					String text = getHighlightedText(analyzer ,query , "content" , content );
+//					System.out.println(text);
+//					System.out.println("========");
+					
+//					System.out.println("Score: " + scoreDoc.score);
+					
+					searchResults.add( new SearchResultDTO(filename, text, scoreDoc.score) );
+					
+					
+				}
+				
+				long end = System.currentTimeMillis();
+				
+				logger.info("Search completed. Query = '{}' , number of results = '{}' and time taken = '{}' ", searchQuery, results.scoreDocs.length, (end-start) );
+
+				
+			} catch (Exception e) {
+				logger.error("Problem in searching for search query: '{}' ", searchQuery, e);
 			}
 			
-			long end = System.currentTimeMillis();
+			return searchResults;			
 			
-			logger.info("Search completed. Query = '{}' , number of results = '{}' and time taken = '{}' ", searchQuery, results.scoreDocs.length, (end-start) );
-
-			
-		} catch (Exception e) {
-			logger.error("Problem in searching for search query: '{}' ", searchQuery, e);
-		}
+		} );
 		
-		return searchResults;
+		
 	}
 
 		
