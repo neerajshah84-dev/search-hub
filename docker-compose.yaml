@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: searchhub-postgres
+    environment:
+      POSTGRES_DB: searchhub
+      POSTGRES_USER: searchhub
+      POSTGRES_PASSWORD: searchhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - searchhub-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  searchhub-postgres-data:

@@ -2,6 +2,7 @@ package com.searchhub.service;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.searchhub.dao.SearchAnalytics;
 import com.searchhub.dto.SearchResultDTO;
+import com.searchhub.repository.SearchAnalyticsRepository;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -41,14 +44,17 @@ public class SearchService {
 	private final Counter searchRequestCounter;
 	private final Timer searchTimer;
 	private final DistributionSummary searchResultSummary;
-	
+	private final AnalyticsService analyticsService;
 	
 	
 	@Value("${index.path}")
 	private String path;
 	
 	
-	public SearchService(MeterRegistry meterRegistry) {
+	public SearchService(MeterRegistry meterRegistry , AnalyticsService analyticsService) {
+		
+		this.analyticsService = analyticsService;
+		
 		this.searchRequestCounter = Counter.builder("searchhub.search.requests")
 										   .description("Total number ofnadacoew Search Requests")
 										   .register(meterRegistry);
@@ -60,6 +66,7 @@ public class SearchService {
 		this.searchResultSummary = DistributionSummary.builder("searchhub.search.results")
 				                                      .description("Number of results returned per search")
 				                                      .register(meterRegistry);
+		
 		
 	}
 	
@@ -120,9 +127,12 @@ public class SearchService {
 				}
 				
 				long end = System.currentTimeMillis();
+				long duration = end - start ;
 				
 				logger.info("Search completed. Query = '{}' , number of results = '{}' and time taken = '{}' ", searchQuery, results.scoreDocs.length, (end-start) );
-
+				
+				analyticsService.saveSearchAnalytics(searchQuery, searchResults.size(), duration);
+				
 				
 			} catch (Exception e) {
 				logger.error("Problem in searching for search query: '{}' ", searchQuery, e);
