@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.searchhub.dao.SearchAnalytics;
+import com.searchhub.dto.AverageDurationDTO;
 import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.repository.SearchAnalyticsRepository;
 
@@ -38,5 +39,9 @@ public class AnalyticsService {
 	
 	public List<TopSearchDTO> getTopSearches() {
 		return searchAnalyticsRepository.findTopSearches();
+	}
+	
+	public AverageDurationDTO getAverageDuration( ) {
+		return searchAnalyticsRepository.findAverageDuration();
 	}
 }
