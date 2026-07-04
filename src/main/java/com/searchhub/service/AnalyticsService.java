@@ -3,12 +3,14 @@ package com.searchhub.service;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.searchhub.dao.SearchAnalytics;
+import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.repository.SearchAnalyticsRepository;
 
 @Service
@@ -32,5 +34,9 @@ public class AnalyticsService {
 		
 		searchAnalyticsRepository.save(searchAnalytics);
 		
+	}
+	
+	public List<TopSearchDTO> getTopSearches() {
+		return searchAnalyticsRepository.findTopSearches();
 	}
 }
