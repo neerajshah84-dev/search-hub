@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.searchhub.dto.AverageDurationDTO;
+import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
+import com.searchhub.dto.TotalSearchesDTO;
 import com.searchhub.service.AnalyticsService;
 
 @RestController
@@ -33,18 +35,18 @@ public class AnalyticsController {
 	}
 	
 	@GetMapping("/total-searches")
-	public void getTotalSearches() {
-		
+	public TotalSearchesDTO getTotalSearches() {
+		return analyticsService.getTotalSearchDTO();
 	}
 	
 	@GetMapping("/searches-today")
-	public void getSearchesToday() {
-		
+	public SearchesTodayDTO getSearchesToday() {
+		return analyticsService.getSearchesToday();
 	}
 	
 	@GetMapping("zero-result-searches")
-	public void getZeroResultSearches() {
-		
+	public List<String> getZeroResultSearches() {
+		return analyticsService.getZeroResultSearches();
 	}
 	
 	

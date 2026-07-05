@@ -2,6 +2,7 @@ package com.searchhub.service;
 
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.searchhub.dao.SearchAnalytics;
 import com.searchhub.dto.AverageDurationDTO;
+import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
+import com.searchhub.dto.TotalSearchesDTO;
 import com.searchhub.repository.SearchAnalyticsRepository;
 
 @Service
@@ -44,4 +47,20 @@ public class AnalyticsService {
 	public AverageDurationDTO getAverageDuration( ) {
 		return searchAnalyticsRepository.findAverageDuration();
 	}
+
+	
+	public TotalSearchesDTO getTotalSearchDTO() {
+		return searchAnalyticsRepository.findTotalSearches();
+	}
+	
+	public SearchesTodayDTO getSearchesToday() {
+		LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+		return searchAnalyticsRepository.findSearchesToday(startOfDay);
+	}
+	
+	public List<String> getZeroResultSearches(){
+		return searchAnalyticsRepository.findZeroResultSearches();
+	}
 }
+
+
