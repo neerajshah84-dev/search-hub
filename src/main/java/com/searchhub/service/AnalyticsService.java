@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.searchhub.dao.SearchAnalytics;
 import com.searchhub.dto.AverageDurationDTO;
 import com.searchhub.dto.DurationDistributionDTO;
+import com.searchhub.dto.SearchSuccessRateDTO;
 import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.dto.TotalSearchesDTO;
@@ -65,6 +66,10 @@ public class AnalyticsService {
 	
 	public DurationDistributionDTO getDurationDistribution() {
 		return searchAnalyticsRepository.findDurationDistribution();
+	}
+	
+	public SearchSuccessRateDTO getSearchSuccessRate() {
+		return searchAnalyticsRepository.findSearchSuccessRate();
 	}
 }
 

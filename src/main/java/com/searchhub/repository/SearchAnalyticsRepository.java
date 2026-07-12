@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import com.searchhub.dao.SearchAnalytics;
 import com.searchhub.dto.AverageDurationDTO;
 import com.searchhub.dto.DurationDistributionDTO;
+import com.searchhub.dto.SearchSuccessRateDTO;
 import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.dto.TotalSearchesDTO;
@@ -72,5 +73,24 @@ public interface SearchAnalyticsRepository
 			""")
 	DurationDistributionDTO findDurationDistribution();
 	
-	
+//	Successful Searches = resultCount > 0
+//	Failed Searches     = resultCount == 0
+//	Success Rate = (successful / total) × 100
+	@Query("""
+			SELECT new com.searchhub.dto.SearchSuccessRateDTO(
+				COUNT(sa.id),
+				SUM(CASE WHEN sa.resultCount > 0 THEN 1L ELSE 0L END),
+				SUM(CASE WHEN sa.resultCount = 0 THEN 1L ELSE 0L END),
+				CASE
+					WHEN COUNT (sa.id) = 0 THEN 0.0
+					ELSE (
+						(SUM(
+						CASE WHEN sa.resultCount > 0 THEN 1.0 ELSE 0.0 END) / COUNT(sa.id )) * 100.0
+						
+					)
+				END
+			)
+			FROM SearchAnalytics sa
+			""")
+	SearchSuccessRateDTO findSearchSuccessRate();
 }

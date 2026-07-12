@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.searchhub.dto.AverageDurationDTO;
 import com.searchhub.dto.DurationDistributionDTO;
+import com.searchhub.dto.SearchSuccessRateDTO;
 import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.dto.TotalSearchesDTO;
@@ -53,5 +54,10 @@ public class AnalyticsController {
 	@GetMapping("/duration-distribution")
 	public DurationDistributionDTO getDurationDistribution() {
 		return analyticsService.getDurationDistribution();
+	}
+	
+	@GetMapping("/success-rate")
+	public SearchSuccessRateDTO getSearchSuccessRate() {
+		return analyticsService.getSearchSuccessRate();
 	}
 }
