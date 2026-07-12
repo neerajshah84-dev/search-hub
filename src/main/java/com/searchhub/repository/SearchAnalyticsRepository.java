@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.searchhub.dao.SearchAnalytics;
 import com.searchhub.dto.AverageDurationDTO;
+import com.searchhub.dto.DurationDistributionDTO;
 import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.dto.TotalSearchesDTO;
@@ -61,4 +62,15 @@ public interface SearchAnalyticsRepository
 			
 			""")
 	List<String> findZeroResultSearches();
+	
+	@Query("""
+			SELECT new com.searchhub.dto.DurationDistributionDTO(
+				MIN(sa.durationMs),
+				AVG(sa.durationMs),
+				MAX(sa.durationMs)
+			) FROM SearchAnalytics sa
+			""")
+	DurationDistributionDTO findDurationDistribution();
+	
+	
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.searchhub.dto.AverageDurationDTO;
+import com.searchhub.dto.DurationDistributionDTO;
 import com.searchhub.dto.SearchesTodayDTO;
 import com.searchhub.dto.TopSearchDTO;
 import com.searchhub.dto.TotalSearchesDTO;
@@ -44,10 +45,13 @@ public class AnalyticsController {
 		return analyticsService.getSearchesToday();
 	}
 	
-	@GetMapping("zero-result-searches")
+	@GetMapping("/zero-result-searches")
 	public List<String> getZeroResultSearches() {
 		return analyticsService.getZeroResultSearches();
 	}
 	
-	
+	@GetMapping("/duration-distribution")
+	public DurationDistributionDTO getDurationDistribution() {
+		return analyticsService.getDurationDistribution();
+	}
 }
